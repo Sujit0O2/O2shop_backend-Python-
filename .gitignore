@@ -8,15 +8,3 @@ __pycache__/
 .envrc
 coverage/
 .ipynb_checkpoints/
-*.log
-migrations/
-db.sqlite3
-/staticfiles/
-/media/
-*.sqlite3
-*.egg-info/
-dist/
-build/
-.pytest_cache/
-htmlcov/
-.tox/
