@@ -29,20 +29,19 @@ def login_user(
     access_token = create_access_token({
         "user_id": user.id,
         "email": user.email,
-        "role": user.role
+        "role": user.role.name  # if role is a relationship
     })
 
     response.set_cookie(
         key="access_token",
         value=access_token,
         httponly=True,
-        secure=True,
+        secure=True,      # ⚠️ set False in local dev if no HTTPS
         samesite="lax",
         max_age=60 * 60
     )
 
     return {"message": "Login successful"}
-
 
 @route.post("/signup")
 def sign_up(req: signup, db: Session = Depends(get_db)):

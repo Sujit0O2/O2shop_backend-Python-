@@ -13,5 +13,5 @@ class User(base):
     email=Column(String,nullable=False,unique=True)
     role=Column(saEnum(Role),nullable= False)
     password=Column(String,nullable= False)
-    # orders = relationship("Order", back_populates="buyer")
+    # orders = relationship("orders", back_populates="buyer")
     products = relationship("Product", back_populates="seller")

@@ -6,20 +6,21 @@ from core.database import get_db
 from models.users import User
 from models.products import Product
 from models.cart import AddToCart as Cart
-import psycopg as pg
+from schemas.AddToCartRequest import AddToCartRequest
+from core.Security.jwt import get_current_user
+from core.Security.jwt import get_current_user
 
 router = APIRouter(
     prefix="/cart",
     tags=["cart"]
+,dependencies=[Depends(get_current_user)]
+    
 )
 
-class AddToCartRequest(BaseModel):
-    user_id: int
-    product_id: int
-    quantity: int
+
 
 @router.post("/add")
-def add_to_cart(request: AddToCartRequest, db: Session = Depends(get_db)):
+def add_to_cart(request: AddToCartRequest, db: Session = Depends(get_db),user: dict = Depends(get_current_user)):
     user = db.query(User).filter(User.id == request.user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -39,6 +40,8 @@ def add_to_cart(request: AddToCartRequest, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(cart_item)
     return {"message": "Product added to cart successfully"}
+
+
 
 @router.get("/user/{user_id}", response_model=List[AddToCartRequest])
 def get_cart_items(user_id: int, db: Session = Depends(get_db)):
@@ -60,11 +63,21 @@ def remove_from_cart(cart_item_id: int, db: Session = Depends(get_db)):
 
 
 @router.put("/update/{cart_item_id}")
-def update_cart_item(cart_item_id: int, quantity: int, db: Session = Depends(get_db)):
-    cart_item = db.query(Cart).filter(Cart.id == cart_item_id).first()
+def update_cart_item(
+    cart_item_id: int,
+    quantity: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user)
+):
+    cart_item = db.query(Cart).filter(
+        Cart.product_id == cart_item_id,
+        Cart.user_id == user.id
+    ).first()
+
     if not cart_item:
         raise HTTPException(status_code=404, detail="Cart item not found")
+
     cart_item.quantity = quantity
     db.commit()
-    db.refresh(cart_item)
-    return {"message": "Cart item updated successfully"}   
+
+    return {"message": "Cart item updated successfully"}

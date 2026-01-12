@@ -1,12 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from core.database import get_db
+from core.Security.jwt import get_current_user
 from services.add_address import add_address
 from schemas.AddressCreate import AddressCreate
 router = APIRouter(prefix="/addresses", tags=["Addresses"])
 @router.post(
-    "/",
-    status_code=status.HTTP_201_CREATED
+    "/address",
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(get_current_user)]
 )
 def create_address(
     req: AddressCreate,
@@ -16,6 +18,7 @@ def create_address(
     if not address:
         raise HTTPException(status_code=400, detail="Failed to add address")
     return address
+
 @router.delete("/{address_id}")
 def delete_address(
     address_id: int,
@@ -32,6 +35,7 @@ def delete_address(
     db.commit()
 
     return {"message": "Address deleted successfully"}
+
 @router.get("/user/{user_id}")
 def get_user_addresses(
     user_id: int,

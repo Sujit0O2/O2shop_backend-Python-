@@ -18,10 +18,11 @@ router = APIRouter(
 # ----------------------------
 # CREATE PRODUCT (SELLER ONLY)
 # ----------------------------
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/add", status_code=status.HTTP_201_CREATED)
 def create_product(
     req: ProductCreate,
     db: Session = Depends(get_db),
+    user=Depends(get_current_user)
 ):
     return addProduct(
         req=req,
